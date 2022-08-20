@@ -83,12 +83,80 @@ promesa.then((heroe) => {
 ```
 
 Ahora si, con ese código, estas ejecutando asincronismo :)
-
 <br>
+Ahora, que pasa, si quieres guardar esa logica, dentro de una función? Es decir, quieres una funcion, a la cual le pasas argumento, y esa te ejecuta la logica, con ese argumento que le estás pasando? Lo tendrías que hacer así:
+(asumiendo que ya tienes una funcion que pide api, llamada estaEsTuPeticionApi)
+
+```javascript
+const estaEsTuFuncionQuePediraApi = (id) => {
+  const promesa = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const heroe = estaEsTuPeticionApi(id);
+      resolve(heroe);
+    }, 2000);
+  });
+  return promesa;
+};
+```
+
+Es necesario que pongas ese return, porque si no, esa funcion lo que te devuelve por defecto es void.
+Tambien podrías nomas directamente escribir el return arriba:
+
+```javascript
+const estaEsTuFuncionQuePediraApi = (id) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const heroe = estaEsTuPeticionApi(id);
+      resolve(heroe);
+    }, 2000);
+  });
+  return promesa;
+};
+```
+
+Así no estarías creando una constante innecesaria, como en el penúltimo ejemplo. Esta es la manera más usada.
+Teniendo esa logica ya atrapada como una funcion, podemos solo escribir en una linea:
+
+```javascript
+estaEsTuFuncionParaPedirApi(4).then((heroe) => console.log(heroe));
+```
+
+Hasta ahora, solo has trabajado con resolve, asumiendo que tu promesa siempre funciona.
+Para implementar el reject, y atrapar ese error con el catch, tienes que implementar un if else.
+
 <br>
 
 ### `catch()`
 
 `cacth()` lo que pones dentro, se ejecutara cuando la promesa devuelva un error
 
+```javascript
+const estaEsTuFuncionQuePediraApi = (id) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const heroe = estaEsTuPeticionApi(id);
+      if (heroe) {
+        resolve(heroe);
+      } else {
+        reject('Tuvimos un error');
+      }
+    }, 2000);
+  });
+  return promesa;
+};
+
+estaEsTuFuncionParaPedirApi(4).then((heroe) => console.log(heroe));
+.catch(err => console.warning(err))
+```
+
 `finally()` se ejecuta despues del then o despues del catch, es decir, ya sea que se haya ejecutado cualquier de esos dos, el finally() es lo que se ejecuta despues de eso.
+
+## mini resumen:
+
+Las promesas básicmente capturan y crean lógica, usando las palabras reservadas `resolve` y `reject`, los cuales reciben parametros, y estos mismos, mandan esos parámetros a otro bloque de lógica el cual posee `.then()` y `.catch()`.
+Estos últimos, ejecutan lógica con el argumento que reciben de resolve y reject.
+<br>
+<br>
+<br>
+
+---

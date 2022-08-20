@@ -160,3 +160,111 @@ Estos últimos, ejecutan lógica con el argumento que reciben de resolve y rejec
 <br>
 
 ---
+
+## `FETCH API`
+
+teniendo tu api_key
+
+```javascript
+const apiKey = 'XF6VjNxOHCOOHgtNwRLAy5oftKQeWRgT';
+```
+
+Y teniendo tu endpoint, que en este caso es:
+api.giphy.com/v1/gifs/trending
+
+Si tu vas a ese url por si solo, te devuelve un package json y te dice que no te puede ensenar el contenido ya que no le estas proveendo la api key.
+Si vas a ese url de ese endpoint, y agregas '?api_key=', seguido de tu api key, es decir:
+https://api.giphy.com/v1/gifs/trending?api_key=XF6VjNxOHCOOHgtNwRLAy5oftKQeWRgT
+Ahora si puedes ver el contenido de esa API
+
+Ahora si, la idea es crear una función, que ejecute esa petición, usando la api key y el endpoint.
+Para esto usaremos fetch, lo cual, ya está instalado en tu navegador, por eso no hay que instalar nada.
+
+Creas la const, y le metes fetch, el cual recibe el url de tu api.
+Como puedes ver, se lo pone en comillas francesas o backticks, ya que usarás strings y tambien tu variable.
+Básicamente estás concatenando tu endpoint el cual es un string, con tu const que contiene a tu api key:
+
+```javascript
+const peticion = fetch(
+  `https://api.giphy.com/v1/gifs/trending?api_key=${apiKey}`
+);
+```
+
+### `fetch() retorna una promesa la cual se llama response`!!
+
+y como es una promesa, quiere decir que puedes usarle .then(), etc :)
+
+Si tu fueses a hacer un `console.log()` a esa response, la consola te mostraría un objeto.
+
+```javascript
+peticion.then((resp) => {
+  console.log(resp);
+});
+```
+
+![objeto-fetch](./imgs/objeto-fetch.png)
+Lo que te importa, esta dentro de la propiedad body, la cuál aún no se puede acceder.
+Para acceder:
+
+```javascript
+peticion.then((resp) => {
+  resp.json().then((data) => {
+    console.log(data);
+  });
+});
+```
+
+Ese código se ve feo, y más adelante veremos como se lo arregla, pero hasta ahora, saber que con esto, ya se muestra la data que nos interesa:
+![data-fetch](./imgs/data-fetch.png)
+
+### `Encadenar promesas`
+
+La manera de escribir el mismo último bloque de código, pero más limpio, es usando `promesas en cadena`:
+
+```javascript
+peticion
+  .then((resp) => resp.json())
+  .then((data) => {
+    console.log(data);
+  })
+  .catch(console.warn);
+```
+
+este bloque de código, se ve mejor y hace exactamente lo mismo que este que usaste previamente:
+
+```javascript
+peticion.then((resp) => {
+  resp.json().then((data) => {
+    console.log(data);
+  });
+});
+```
+
+Básicamente lo que pasa, es que, el resultado del primer then, es pasado al siguiente then, y así.
+
+##### _no hace falta escribir múltiples `catch()` ya que con uno, atrapas todos los errores_
+
+<br>
+Para agregar, el url específico de una imagen, y crear una imagen en el HTML:
+
+```javascript
+const apiKey = 'XF6VjNxOHCOOHgtNwRLAy5oftKQeWRgT';
+
+const peticion = fetch(
+  `https://api.giphy.com/v1/gifs/trending?api_key=${apiKey}`
+);
+
+peticion
+  .then((resp) => resp.json())
+  .then(({ data }) => {
+    const { url } = data.images.original;
+    const img = document.createElement('img');
+    img.src = url;
+
+    document.body.append(img);
+  })
+  .catch(console.warn);
+```
+
+Date cuenta como se crea una const para la url, luego creas un elemento con el método `createElement()`, y luego le agregas la url al src.
+Al final, usando manipulación del dom, en el body, usas el metodo `append()` para agregar esa img, a tu HTML.

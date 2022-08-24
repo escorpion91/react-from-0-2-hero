@@ -13,10 +13,10 @@ Las promesas se crean con:
 - con un argumento adentro, que es un callback
 - el callback recibe dos argumentos: resolve y reject
 - se los llama asi por convención, realmente los puedes llamar como te de la gana
-- resolve se ejecuta cuando la promesa es exitosa
-- reject se ejecuta cuando ha habido un error
+- `resolve` se ejecuta cuando la promesa es exitosa
+- `reject` se ejecuta cuando ha habido un error
 - setTimeout es una funcion que recibe dos argumentos. Un callback y el tiempo en que ejecutes ese callback.
-- En este caso, el console log, lo hará despues de 2000 milisegundos
+- En este caso, el `console.log` lo hará después de 2000 milisegundos
 
 ```javascript
 const promesa = new Promise((resolve, reject) => {
@@ -163,6 +163,8 @@ Estos últimos, ejecutan lógica con el argumento que reciben de resolve y rejec
 
 ## `FETCH API`
 
+La idea en este pdf, es saber básicamente como funciona fetch api y aprender sobre _`promesas en cadena`_
+
 teniendo tu api_key
 
 ```javascript
@@ -268,3 +270,282 @@ peticion
 
 Date cuenta como se crea una const para la url, luego creas un elemento con el método `createElement()`, y luego le agregas la url al src.
 Al final, usando manipulación del dom, en el body, usas el metodo `append()` para agregar esa img, a tu HTML.
+
+---
+
+<br>
+<br>
+
+---
+
+## `Async-Await`
+
+Primero un pequeño ejemplo de una promesa:
+
+```javascript
+const estaEsTuPromesa = () = {
+    const promesa = new Promise((resolve, reject) => {
+        resolve('https://cualquiercosa.com')
+    })
+    return promesa;
+}
+
+estaEsTuPromesa().then(console.log)
+```
+
+El siguiente paso para hacer ese código más corto:
+
+```javascript
+const estaEsTuPromesa = () = {
+    return new Promise((resolve, reject) => {
+        resolve('https://cualquiercosa.com')
+    })
+    return promesa;
+}
+
+estaEsTuPromesa().then(console.log)
+```
+
+El siguiente:
+
+```javascript
+const estaEsTuPromesa = () => new Promise((resolve =>
+        resolve('https://cualquiercosa.com')
+    )
+
+estaEsTuPromesa().then(console.log)
+```
+
+Hasta este punto, el código está más corto, pero no necesariamente más sencillo de leer.
+Aquí es donde entra el `async-await`
+
+Se puede lograr lo mismo que los códigos de arriba, de esta manera:
+
+```javascript
+const getImage = () => {
+  return 'https://cualquiercosa.com';
+};
+
+getImage();
+```
+
+Si, retorna lo mismo que el otro código, pero con una gran diferencia, esto no es aún asíncrono.
+Para hacerlo asíncrono:
+
+```javascript
+const getImage = async () => {
+  return 'https://cualquiercosa.com';
+};
+
+getImage().then(console.log);
+```
+
+Ahora si, lograste que sea asíncrona. Usaste dos cosas:
+
+- la palabra reservada `async` antes de los argumentos
+- `.then()` despues de convocar la función.
+
+_el async puede estar independiente, sin necesitar el await. El await siempre necesitará del async_
+
+El await nos permite trabajar nuestro código como si fuese síncrono.
+
+La idea es hacer la siguiente linea de código (sacada de un ejercicio anterior, pero hacerla con async-await):
+
+_(`sin async-await`)_:
+
+```javascript
+const apiKey = 'XF6VjNxOHCOOHgtNwRLAy5oftKQeWRgT';
+
+const peticion = fetch(
+  `https://api.giphy.com/v1/gifs/trending?api_key=${apiKey}`
+);
+
+peticion
+  .then((resp) => resp.json())
+  .then(({ data }) => {
+    const { url } = data.images.original;
+    const img = document.createElement('img');
+    img.src = url;
+
+    document.body.append(img);
+  })
+  .catch(console.warn);
+```
+
+_(`con async-await`)_:
+
+```javascript
+const getImagen = async() => {
+
+
+    const apiKey='XF6VjNxOHCOOHgtNwRLAy5oftKQeWRgT';
+
+    const peticion = await fetch(`https://api.giphy.com/v1/gifs/trending?api_key=${apiKey})`
+
+    const {data} = await peticion.json();.
+    const {url} = data.images.original;
+
+    const img = document.createElement('img);
+    img,src = url;
+    document.body.append(img);
+}
+```
+
+En el async-await, para manejar errores, se usa `try` y `catch`:
+
+```javascript
+const getImagen = async() => {
+    try {
+        const apiKey='XF6VjNxOHCOOHgtNwRLAy5oftKQeWRgT';
+
+        const peticion = await fetch(`https://api.giphy.com/v1/gifs/trending?api_key=${apiKey})`
+
+        const {data} = await peticion.json();
+
+        const {url} = data.images.original;
+
+        const img = document.createElement('img');
+        img.src = url;
+
+        document.body.append(img);
+    } catch(error) {
+        #aquí va tu lógica del error
+    }
+}
+```
+
+---
+
+<br>
+<br>
+
+---
+
+## `Operación Condicional Ternario`
+
+Este código:
+
+```javascript
+const = 'activo'
+let mensaje = '';
+
+if (activo) {
+    mensaje = 'Activo';
+} else {
+    mensaje = 'Inactivo'
+}
+```
+
+Es lo mismo que:
+
+```javascript
+const activo = true;
+const mensaje = activo ? 'Activo' : 'Inactivo';
+```
+
+En caso de querer hacer algo cuando la condición se cumpla pero no hacer nada si no se cumple:
+
+```javascript
+const activo = true;
+const mensaje = activo ? 'Activo' : null;
+```
+
+O mejor:
+
+```javascript
+const activo = true;
+const mensaje = activo && 'Activo';
+```
+
+eso ejecuta solo si la condición se cumple, si no, retorna false.
+Esto es bastante útil y facil en react.
+
+---
+
+<br>
+
+<br>
+
+---
+
+# `React`
+
+#### _`Componentes`_
+
+Una pequeña pieza de código encapsulada y re-utilizable, que puede tener un `estado` o no.
+Puede ser parent y/o child de otro componente.
+
+#### _`Estado`_
+
+Como se encuentra o considera al componente, en un punto determinado en el tiempo.
+
+---
+
+### `Creando tu app`
+
+- Haces cd a la carpeta donde guardarás todo tu proyecto
+- Abre la terminal desde esa carpeta
+- ```console
+  npx create-react-app el-nombre-de-tu-app
+  ```
+- Con eso se crea tu app
+- Has cd a tu carpeta
+- ```console
+  npm start
+  ```
+
+---
+
+### `Borrando archivos innecesarios`
+
+Hasta aquí ya podrías ver tu app, con el template de react.
+Puedes ver cómo funciona todo.
+El siguiente paso es eliminar el contenido que no vas a usar, eso es el contenido del div en app.js, y reemplazado con un texto como ‘mi proyecto” solo para confirmar de que se sigue renderizando.
+
+También debes borrar:
+
+- app.test.js
+- index.css
+- logo.svg
+- reportWebVitals.js
+- setupTest.js
+
+Ahora tienes que medio editar los imports de los archivos que te restaron ya que dependen de esos archivos que has borrado:
+
+- webVitals en index.js
+- index.css en index.js
+- logo en app.js
+- todo el contenido del index.css
+
+---
+
+_`El routeo de una app en react es asi:`_
+
+- Tus componentes son creados en src
+- De ahi, ellos van a tu app.jsx
+- De ahi, esa app, es renderizada en root en index.html, via tu index.js
+
+---
+
+_`Hola mundo:`_
+
+```jsx
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+const saludo = <h1>Hola soy Gokú</h1>;
+
+const divRoot = document.querySelector('#root');
+
+ReactDom.render(saludo, divRoot);
+```
+
+El ejemplo de arriba es un simple hola mundo, para entender un poco más de como funciona react a la hora de renderizar.
+
+- import React sirve para poder escribir en JSX
+- ReactDom para traer el método render()
+- El método render() recibe dos parámetros:
+  - Lo que se va a renderizar
+  - En dónde lo vas a renderizar
+
+---

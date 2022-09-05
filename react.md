@@ -481,7 +481,7 @@ Como se encuentra o considera al componente, en un punto determinado en el tiemp
 
 ---
 
-### `Creando tu app`
+### `Creando una app`
 
 - Haces cd a la carpeta donde guardarás todo tu proyecto
 - Abre la terminal desde esa carpeta
@@ -522,7 +522,7 @@ Ahora tienes que medio editar los imports de los archivos que te restaron ya que
 _`El routeo de una app en react es asi:`_
 
 - Tus componentes son creados en src
-- De ahi, ellos van a tu app.jsx
+- De ahi, ellos van a tu app.jsx (son importados y metidos dentro de un div con sintax de componente)
 - De ahi, esa app, es renderizada en root en index.html, via tu index.js
 
 ---
@@ -549,3 +549,105 @@ El ejemplo de arriba es un simple hola mundo, para entender un poco más de como
   - En dónde lo vas a renderizar
 
 ---
+
+### `Crear un Componente`
+
+La idea, como está mencionado más arriba, es crear un componente que retorne un html. Este file exporta ese componente, el cual luego sera importado en tu app, la cual es el elemento padre, que contendrá a todos tus componentes.
+
+- Si o si, debes importar react
+- imr + tab es shortcut para escribirlo mas áapido
+- rafce shortcut para crear el resto de sintax
+
+```jsx
+import React from 'react';
+
+const PrimerComponente = () => {
+  return <h1>Hola, soy Gokú</h1>;
+};
+
+export default PrimerComponente;
+```
+
+Un ejemplo más práctico:
+
+### _Absolutamente todo, tiene que ir dentro de un mismo div, en este caso el header, el cual está dentro del return de la función._
+
+```jsx
+import React from 'react';
+import './header.css';
+import CTA from './CTA';
+import ME from '../../assets/pic3.jpeg';
+import HeaderSocials from './HeaderSocials';
+
+const Header = () => {
+  return (
+    <header>
+      <div className="container header__container">
+        <h5>Hi! I'm</h5>
+        <h1>Juan Manuel</h1>
+        <h5 className="text-light">Fullstack dev</h5>
+        <CTA />
+        <HeaderSocials />
+
+        <div className="me">
+          <img src={ME} alt="me" />
+        </div>
+
+        <a href="#contact" className="scroll__down">
+          Scroll Down
+        </a>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
+```
+
+- Mira como importa hasta otros componentes, y los mete dentro del 'html'
+- mira como importa un img y le asigna un nombre {me}, para luego ponerlo como src, con **ESA** sintax.
+- mira como esta importado el css
+
+Hecho eso, ese componente, irá importado en el componente de tu app, y será invocado ahí mismo dentro del 'HTML' (en verdad es JSX), con sintax de JSX, dentro de la arrow function de tu app. es decir, tu app es el elemento padre de todos tus otros componentes:
+
+```jsx
+<TuComponente />
+```
+
+_ejemplo:_
+
+```jsx
+import React from 'react';
+import Nav from './components/nav/Nav';
+import About from './components/about/About';
+import Experience from './components/experience/Experience';
+import Portfolio from './components/portfolio/Portfolio';
+import Contact from './components/contact/Contact';
+import Footer from './components/footer/Footer';
+
+const App = () => {
+  return (
+    <>
+      <Nav />
+      <About />
+      <Experience />
+      <Portfolio />
+      <Contact />
+      <Footer />
+    </>
+  );
+};
+
+export default App;
+```
+
+Una vez que tienes tu app conteniendo a todos los componentes, en tu index.js, tienes que renderizar, tu app, a un index.html.
+Esto ya lo vimos mas arriba:
+
+```javascript
+import ReactDOM from 'react-dom';
+import App from './App';
+import './index.css';
+
+ReactDOM.render(<App />, document.querySelector('#root'));
+```

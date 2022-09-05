@@ -548,7 +548,11 @@ El ejemplo de arriba es un simple hola mundo, para entender un poco más de como
   - Lo que se va a renderizar
   - En dónde lo vas a renderizar
 
+<br>
+
 ---
+
+<br>
 
 ### `Crear un Componente`
 
@@ -567,6 +571,24 @@ const PrimerComponente = () => {
 
 export default PrimerComponente;
 ```
+
+<br>
+
+ejemplo declarando una variable:
+
+```jsx
+import React from 'react';
+
+const PrimerComponente = () => {
+  const saludo = 'Hola soy Gokú';
+
+  return <h1>{saludo}</h1>;
+};
+
+export default PrimerComponente;
+```
+
+<br>
 
 Un ejemplo más práctico:
 
@@ -650,4 +672,185 @@ import App from './App';
 import './index.css';
 
 ReactDOM.render(<App />, document.querySelector('#root'));
+```
+
+<br>
+
+---
+
+<br>
+<br>
+
+## ` Props`
+
+Hasta ahora, el routeo es:
+
+componentes -> app.jsx -> index.js -> index.html
+
+Tu app jsx es básicamente la que reune todos tus componentes, para luego ser usada, como un todo, en tu index.js general del proyecto, y poder ser renderizada en tu html.
+
+Esto hace que index js, sea padre de app.jsx, el cual a su vez, es padre de tus componentes.
+
+Un componente padre o parent component le puede mandar, en caso de ser necesario, información a su componente hijo/child component.
+Esta info es llamada `props`.
+
+La manera en que funciona es, asumiendo que tienes un componente:
+
+- En el componente, escribes el código como si ya tuvieras esa propiedad que le va a pasar juego el index.js.
+
+- En el index js, al momento de llamar al componente, le pasas ese prop.
+
+ejemplo:
+
+```jsx
+import React from 'react';
+
+const TuComponente = ({ saludo }) => {
+  return (
+    <>
+      <h1> {saludo} </h1>
+    </>
+  );
+};
+
+export default TuComponente;
+```
+
+Escribes el código, implementando ya el prop, que a este punto es como tu 'decoy'.
+
+Al momento de llamar a este componente en tu app.js, lo haces pasándole el prop, de esta manera:
+
+```jsx
+import React from 'react';
+import ReactDOM from 'react-dom';
+import TuComponente from './TuComponente';
+
+import './index.css';
+
+const divRoot = document.querySelector('#root');
+
+ReactDOM.render(<TuComponente saludo="Hola soy Gokú" />, divRoot);
+```
+
+Esto te renderizaría en el DOM, un h1 diciendo 'Hola soy Gokú'.
+
+<br>
+<br>
+
+`Valores por defecto`
+
+En caso de que al momento de renderizar tu componente, no se le sea pasado una prop, tu puedes dejar listo previamente, un valor por defecto.
+
+De igual manera, tambien puedes obligar a un cliente u otro programador, a que antes de renderizarlo, se le sea pasado un prop, a tu componente, caso contrario que no funcione. De esta manera logras, en caso de ser necesario, que tu componente funcione como quieras que funcione.
+
+Para poner un valor por defecto:
+
+```jsx
+import React from 'react';
+
+const TuComponente = ({ saludo = 'Hola, soy Gokú' }) => {
+  return (
+    <>
+      <h1> {saludo} </h1>
+    </>
+  );
+};
+
+export default TuComponente;
+```
+
+###### _`en caso de que sí se le mande igual una prop, react le da prioridad a la prop que fue pasada, sobre el valor por defecto.`_
+
+<br>
+
+`Obligar a recibir prop`
+
+Una manera de hacer la validación del saludo:
+
+```jsx
+import React from 'react';
+
+const TuComponente = ({ saludo }) => {
+  if (!saludo) {
+    throw new Error('el saludo es necesario');
+  }
+
+  return (
+    <>
+      <h1> {saludo} </h1>
+    </>
+  );
+};
+
+export default TuComponente;
+```
+
+Esa manera no es ni muy eficiente, mi muy usada.
+Una major manera sería usando _`PropTypes.`_
+
+<br>
+
+### `PropTypes`
+
+Para empezar, debes importarlo:
+
+```jsx
+import PropTypes from 'prop-types';
+```
+
+Como el nombre lo dice, sirve para especificar el tipo de props, con el que trabajará tu componente.
+
+De esta manera, abajo al final de tu código, puedes escribir un objeto, el cual tendrá el nombre de tu prop, y su valor, que vendría a ser el tipo que tu desees:
+
+```jsx
+import React from 'react';
+import PropTypes from 'prop-types';
+
+const TuComponente = ({ saludo }) => {
+  return (
+    <>
+      <h1> {saludo} </h1>
+    </>
+  );
+};
+
+TuComponente.propTypes = {
+  saludo: Proptypes.string,
+};
+
+export default TuComponente;
+```
+
+###### _`nótese el uso de las 'p' mayúsculas y minúsculas en la palabra proptypes a lo largo del código. Parece que lo escribí mal yo pero en realidad está todo bien`_
+
+<br>
+
+###### _`En ese código estas especificando que el prop tiene que ser string, pero aún no estás haciendo que sea obligatorio un prop`_
+
+<br>
+
+###### _`el proptype puede ser string, boolean, array, object o lo que quieras`_
+
+<br>
+
+En el ejemplo de arriba, aún no has logrado que el saludo sea obligatorio.
+Para hacerlo, lo haces usando el método `.isRequired`
+
+```jsx
+import React from 'react';
+import PropTypes from 'prop-types';
+
+const TuComponente = ({ saludo }) => {
+  return (
+    <>
+      <h1> {saludo} </h1>
+    </>
+  );
+};
+
+TuComponente.propTypes = {
+  saludo: Proptypes.string.isRequired,
+};
+
+export default TuComponente;
 ```

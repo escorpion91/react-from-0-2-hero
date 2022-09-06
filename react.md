@@ -748,10 +748,11 @@ Para poner un valor por defecto:
 ```jsx
 import React from 'react';
 
-const TuComponente = ({ saludo = 'Hola, soy Gokú' }) => {
+const TuComponente = ({ saludo = 'Hola, soy Gokú', subtitulo = 'texto' }) => {
   return (
     <>
       <h1> {saludo} </h1>
+      <p> {subtitulo} </p>
     </>
   );
 };
@@ -761,6 +762,9 @@ export default TuComponente;
 
 ###### _`en caso de que sí se le mande igual una prop, react le da prioridad a la prop que fue pasada, sobre el valor por defecto.`_
 
+Esta es la manera más tradicional de hacerlo, pero hay otra manera usando _defaultProps_, esa la escribiré más abajo más luego.
+
+<br>
 <br>
 
 `Obligar a recibir prop`
@@ -788,6 +792,7 @@ export default TuComponente;
 Esa manera no es ni muy eficiente, mi muy usada.
 Una major manera sería usando _`PropTypes.`_
 
+<br>
 <br>
 
 ### `PropTypes`
@@ -854,3 +859,248 @@ TuComponente.propTypes = {
 
 export default TuComponente;
 ```
+
+<br>
+<br>
+
+### `DefaultProps`
+
+Al principio de esta parte de props, está especificado como poner valores por defecto a las props.
+
+Pero se puede hacer usando defaultProps, que es muy similar a como lo hace PropTypes:
+
+```jsx
+import React from 'react';
+import PropTypes from 'prop-types';
+
+const TuComponente = ({ saludo }) => {
+  return (
+    <>
+      <h1> {saludo} </h1>
+      <p> {subtitulo} </p>
+    </>
+  );
+};
+
+TuComponente.propTypes = {
+  saludo: Proptypes.string.isRequired,
+};
+
+TuComponente.defaultProps = {
+  subtitulo: 'soy un subtítulo',
+  saludo: 'Hola, soy Gokú',
+};
+
+export default TuComponente;
+```
+
+<br>
+<br>
+
+### `CounterApp`
+
+Una app bastante precisa para empezar a entender react, es una que cuente cada vez que le des click a un botón, ya que el contador se actualiza en tiempo real, y este conteo es capturado por el index js, y luego es pasado como prop a su hijo, tu componene, el cual será renderizado en el explorado.
+Para esto se usa click eventes, useStates y hooks.
+
+PARA COMENZAR, tu componente se escribiría así:
+
+```jsx
+import React from 'react';
+import PropTypes from 'prop-types';
+
+const CounterApp = ({ value }) => {
+  const handleAdd = (e) => {
+    console.log(e);
+  };
+
+  return (
+    <>
+      <h1>CounterApp</h1>
+      <h2> {value} </h2>
+
+      <button onClick={handleAdd}>+1</button>
+    </>
+  );
+};
+
+CounterApp.propTypes = {
+  value: PropTypes.number,
+};
+
+export default CounterApp;
+```
+
+Básicamente ese código lo que dice es:
+
+- el _onClick_ en react espera siempre un evento.
+- Declaramos la función afuera en este caso, pero tambien podía ser declarada dentro del onClick
+- Como la función declarada ya recibe un argumento 'e', no es necesario escribirlo dentro del onClick.
+- ese prop, tiene que ser un número
+- el motivo de que sea un número es porque mediante clickevents, se irá sumando al contador de clicks.
+
+Tu index.js se escribiría así:
+
+```js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import CounterApp from './CounterApp';
+
+import './index.css';
+
+const divRoot = document.querySelector('#root');
+
+ReactDOM.render(<CounterApp value={10} />, divRoot);
+```
+
+<br>
+<br>
+
+### `HOOKS y USESTATE`
+
+Agregando hooks y useState:
+
+```jsx
+import React, (useState) from 'react';
+import PropTypes from 'prop-types';
+
+
+const CounterApp = ({ value }) => {
+
+
+  const [counter, setCounter] = useState(0);
+
+  const handleAdd = () => {
+    setCounter(counter + 1);
+  }
+
+  return (
+    <>
+      <h1>CounterApp</h1>
+      <h2> {counter} </h2>
+
+      <button onClick={ handleAdd }>+1</button>
+    </>
+  );
+};
+
+CounterApp.propTypes = {
+  value: PropTypes.number,
+};
+
+export default CounterApp;
+```
+
+- importa useState primero
+
+tienes que entender que useState retorna un array.
+El primer elemento del array es el que se lo usará como state.
+El segundo elemento, es una función, la cual se la usa para cambiar al state.
+
+- como useState retorna array, podrías guardalo en una constante, y luego indexar, pero se vería un poco confuso. Por lo tanto tienes que destructurar, por eso se escribe así como array
+- Mediante destructuración, declara una constante
+- Esta const, tiene dos elementos: counter (puedes llamarlo como quieras) y tiene setCounter
+- Esas son tus dos variables del array que te retorna useState
+- useState recibe un argumento, el cual es el valor inicial o por defecto de tu estado, es decir en este caso, de 'counter'
+- Al momento de ejecutarse handleAdd, esta ejecuta setCounter, el cual, en este ejemplo, le suma 1 a counter.
+- No puedes escribir setCounter directamente en onClick (o sea puedes, pero la sintax es especial)
+- Finalmente, mira como ahora el h2 de tu html, tiene esa misma variable, counter. La cual es directamente renderizada, cada vez que le dess click, ya que useState la cambia con su función setCounter :)
+
+<br>
+<br>
+
+### `handleSubstract y handleReset`
+
+Ya hicimos arriba, un contador el cual suma cada vez que se de click.
+Ahora la idea es hacer uno que quite 1 al contador, y otro botón que resetee todo a cero.
+
+- Lo primero, obviamente, es agregar los botones
+- Luego la idea es usar el setCounter para alterar el counter.
+- En esta ocasión lo escribiré directamente en el onClick solo para demostrar como sería la sintax.
+
+```jsx
+import React, (useState) from 'react';
+import PropTypes from 'prop-types';
+
+
+const CounterApp = ({ value = 0 }) => {
+
+
+  const [counter, setCounter] = useState(value);
+
+  const handleAdd = () => {
+    setCounter(counter + 1);
+  }
+
+  return (
+    <>
+      <h1>CounterApp</h1>
+      <h2> {counter} </h2>
+
+      <button onClick={ handleAdd }>+1</button>
+      <button onClick={ ()=> setCounter(value)}>Reset</button>
+      <button onClick={ ()=> setCounter(counter - 1)}>-1</button>
+    </>
+  );
+};
+
+CounterApp.propTypes = {
+  value: PropTypes.number,
+};
+
+export default CounterApp;
+```
+
+El código de arriba funciona perfectamente. La otra forma de hacerlo sería:
+
+- Creando una función para cada efecto, es decir, para restar y otra para resetear. Para sumar obviamente no porque ya esta creada.
+- De esta manera, en el onClick solo necesitaríamos convocar a la función
+
+```jsx
+import React, (useState) from 'react';
+import PropTypes from 'prop-types';
+
+
+const CounterApp = ({ value = 0 }) => {
+
+
+  const [counter, setCounter] = useState(value);
+
+  const handleAdd = () => {
+    setCounter(counter + 1);
+  }
+
+    const handleSubstract = () => {
+    setCounter(counter - 1);
+  }
+
+    const handleReset = () => {
+    setCounter(value);
+  }
+
+  return (
+    <>
+      <h1>CounterApp</h1>
+      <h2> {counter} </h2>
+
+      <button onClick={ handleAdd }>+1</button>
+      <button onClick={ handleReset}>Reset</button>
+      <button onClick={ handleSubstract}>-1</button>
+    </>
+  );
+};
+
+CounterApp.propTypes = {
+  value: PropTypes.number,
+};
+
+export default CounterApp;
+```
+
+<br>
+
+---
+
+<br>
+<br>
+
+## `Pruebas Unitarias y de Integración`

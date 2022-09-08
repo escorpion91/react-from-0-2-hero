@@ -427,3 +427,62 @@ WHERE (nacimiento <= '1990-01-01' AND points <= 600)
 <br>
 
 ### _**`IN`**_ operator
+
+Para entender el in, primero hay que tener claro algo.
+El operador _or_, combina condiciones. Entonces, digamos que queremos regresar clientes que son o de guayaquil o de cuenca o de quito. La manera correcta de escribirlo sería:
+
+```SQL
+SELECT *
+FROM customers
+WHERE state = 'Cuenca' OR state = 'Guayaquil' OR state = 'Quito'
+```
+
+La manera incorrecta:
+
+```SQL
+SELECT *
+FROM customers
+WHERE state = 'Cuenca' OR 'Guayaquil' OR 'Quito'
+```
+
+La razón por la cual no funciona es que OR combina condiciones. Pero como puedes ver en el ejemplo de arriba, al lado derecho del OR, no hay una condición. Hay una string. Por eso es que debes escribirlo como en el penúltimo ejemplo.
+
+El penúltimo ejemplo te devolvería cualquier cliente que sea de cualquiera de esas ciudades.
+Aquí es cuando entra el operado **_in_**
+
+Este operador te permite escribir lo del ejemplo anterior, pero de una manera mas limpia.
+Entonces, en vez de combinar varias condiciones usando el operador OR, como aquí:
+
+```SQL
+SELECT *
+FROM customers
+WHERE state = 'Cuenca' OR state = 'Guayaquil' OR state = 'Quito'
+```
+
+Podemos usar el operador _in_ así:
+
+```SQL
+SELECT *
+FROM customers
+WHERE state IN ('Cuenca','Guayaquil','Quito')
+```
+
+Este query hace exactamente lo mismo que el anterior, es decir, te devuelve clientes que tengan cualquiera de esas ciudades.
+El orden en que pases las ciudades no importa.
+
+Podemos mezclar el **_IN_** con el **_NOT_**
+Asumamos que queremos agarrar a cualquier cliente que no tenga NI UNA, de esas ciudades:
+
+```SQL
+SELECT *
+FROM customers
+WHERE state NOT IN ('Cuenca','Guayaquil','Quito')
+```
+
+<br>
+
+---
+
+<br>
+
+### _**`BETWEEN`**_ operator

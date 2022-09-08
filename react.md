@@ -1104,3 +1104,73 @@ export default CounterApp;
 <br>
 
 ## `Pruebas Unitarias y de Integración`
+
+Las pruebas unitarias están enfocadas en pequeñas funcionalidades de tu aplicación.
+
+Las de integración están enfocadas en como reaccionan varias piezas o funcionalidades en conjunto.
+
+**Las pruebas son locales, y se ejecutan en el desarrolo de tu aplicación.
+No se las desplega porque se las excluye al momento de hacer el bundle de producción. De esta manera no hacen tu aplicación más lenta para el cliente.**
+
+Como un ejemplo visual:
+Digamos que tienes un carro.
+Una prueba unitaria seria la llanta. Cual componente aislado, será puesta a prueba para ver que gire bien, que no haya deformaciones, etc.
+
+Una de integración sería que tomes 4 llantas, y las pruebas con el resto de la carrocería para ver si se integran y funcionan correctamente.
+
+Cuando hablamos de pruebas en programación, tienen que tener ciertas características:
+
+- Fáciles de escribir
+- Fáciles de leer
+- Confiables
+- Rápidas
+- Principalmente unitarias (porque si tienes todas las piezas de tu aplicación bien testeadas, una prueba de integración bastaría para confirmar la integración entre todas las piezas)
+
+Esos pasos de arriba se aplican y son conocidos como AAA
+
+- Arrenge
+- Act
+- Assert
+
+`Arrenge`
+
+En este paso se establece el estado inicial.
+En este paso:
+
+- Inicializamos variables
+- Hacemos importaciones necesarias
+- En general, preparamos el ambiente en donde probar
+
+`Act`
+
+En este paso se aplican acciones y estímulos al sujeto de prueba.
+En este paso:
+
+- Llamamos métodos
+- Simulamos clicks
+- Realizar cualquier acción, sobre el paso anterior
+
+`Assert`
+
+En este paso se observa el comportamiento resultante.
+Aqui se observa:
+
+- Si los resultados son los esperados, o si algo incremento, o no paso nada, etc.
+
+<br>
+
+---
+
+<br>
+<br>
+
+## `Gif APP`
+
+En esta parte crearemos una react app desde cero, la cual consume de la API de giphy.
+Usaremos:
+
+- React
+- Consumo de API
+- Hooks de react
+- Implementar un buscador que lea lo que le escribimos
+- Testing

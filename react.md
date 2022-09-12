@@ -995,6 +995,7 @@ export default CounterApp;
 tienes que entender que useState retorna un array.
 El primer elemento del array es el que se lo usará como state.
 El segundo elemento, es una función, la cual se la usa para cambiar al state.
+Este segundo elemento puede recibir una arrow function, cuyo argumento, por defecto, react tomará como que es el estado anterior de tu state.
 
 - como useState retorna array, podrías guardalo en una constante, y luego indexar, pero se vería un poco confuso. Por lo tanto tienes que destructurar, por eso se escribe así como array
 - Mediante destructuración, declara una constante
@@ -1174,3 +1175,84 @@ Usaremos:
 - Hooks de react
 - Implementar un buscador que lea lo que le escribimos
 - Testing
+
+Primero, tu app se ve asi:
+![](./imgs/gifexpert.png)
+
+Para empezar, tenemos nuesstra app la cual es un componente. Dentro de ella, tambien hay otro componente (la input box):
+
+```js
+import React, { useState } from 'react';
+import { AddCategory } from './components/AddCategory';
+
+const GifExpertApp = () => {
+  const [categories, setCategories] = useState([
+    'One Punch',
+    'Samurai X',
+    'Dragon Ball',
+  ]);
+
+  return (
+    <div>
+      <h2>GifExpertApp</h2>
+      <AddCategory setCategories={setCategories} />
+      <hr></hr>
+
+      <ol>
+        {categories.map((category) => {
+          return <li key={category}>{category}</li>;
+        })}
+      </ol>
+    </div>
+  );
+};
+
+export default GifExpertApp;
+```
+
+- Esta app hasta ahora lo que hace es que lo que sea que escribas en el input box, se agrega a la lista de series que ya está escrita abajo.
+- Esta lista es un array como puedes ver.
+- Esta app contiene:
+  - un h2
+  - un componente al cual se le pasa un prop el cual es el que se agregará a la lista de series
+  - una horizontal row
+  - una ordered list, la cual esta hecha usando el método map. El map como puedes ver entra al array de tus series y retorna cada elemento, como un _li_
+
+El otro componente:
+
+```js
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+
+export const AddCategory = ({ setCategories }) => {
+  const [inputValue, setInputValue] = useState('');
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (inputValue.trim().length > 2) {
+      setCategories((cats) => [...cats, inputValue]);
+      setInputValue('');
+    }
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input type="text" value={inputValue} onChange={handleInputChange} />
+      </form>
+    </div>
+  );
+};
+
+AddCategory.propTypes = {
+  setCategories: PropTypes.func.isRequired,
+};
+```
+
+- Este componente es básicamente una caja de input.
+- Usaremos useStates para cambiar el valor de lo que dice la caja.
+- El valor de la caja esta asignado a inputValue

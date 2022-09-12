@@ -486,3 +486,418 @@ WHERE state NOT IN ('Cuenca','Guayaquil','Quito')
 <br>
 
 ### _**`BETWEEN`**_ operator
+
+Teniendo esta tabla:
+
+| first_name | last_name | points | state  |
+| ---------- | --------- | ------ | ------ |
+| Juan       | Enderica  | 300    | Guayas |
+| Manuel     | Fayad     | 100    | Quito  |
+| Pablo      | Jiemnez   | 600    | Cuenca |
+| Josué      | Jiemnez   | 900    | Cuenca |
+
+Digamos que queremos obtener los clientes que tengan entre 500 y 900 puntos.
+
+```SQL
+SELECT *
+FROM customers
+WHERE points >= 500 AND points <= 900
+```
+
+Ese query básicamente te devuelve clientes que cumplan con esas dos condiciones al mismo tiempo, devolviéndote los que tienen entre 500 y 900 puntos.
+
+En ese caso, puedes usar el operador _between_, logrando lo mismo.
+Este operador lo puedes usar siempre que necesites analizar un rango de valores, dentro de un mismo atributo. En este caso, el atributo es points.
+Esto hace tu código más corto y más limpio.
+Lo escribirías así:
+
+```SQL
+SELECT *
+FROM customers
+WHERE points BETWEEN 500 AND 900;
+```
+
+Esto te devuelve exactamente lo smimo al código anterior.
+Cabe recalcar que es inclusivo, es decir, incluye el 500, y el 900, al igual que un **>=** o **<=**.
+
+<br>
+
+---
+
+<br>
+
+### _**`LIKE`**_ operator
+
+Con este operador se puede regresar rows que hagan match a ciertos patrones de string que le especifiquemos.
+Por ejemplo, digamos que queremos los clientes cuyo apellido empieza con la letra 'J':
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name LIKE 'J%';
+```
+
+El % significa que después de la 'j' pueden ir cualquier cantidad de caracteres, desde 0 a infinito.
+Tampoco importa si la j esta en mayúsculas.
+
+Otro ejemplo sería, conseguir los clientes que tengan la letra e en cualquier lugar de su apellido.
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name LIKE '%J%';
+```
+
+Otro ejemplo: Conseguir clientes que sus apellidos terminen con la letra 'z':
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name LIKE '%Z ';
+```
+
+Dentro de LIKE, así como tenemos _%_, tambien tenemos \_\__.
+El subguión sirve para representar a un \_cualquier único caracter_
+Es decir: si pones \_Y , estás queriendo decir que estás buscando a dos y solo dos caracteres, de los cuales el primero puede ser cualquiera, y el segundo una 'y'.
+Puedes usar varios subguiones seguidos como quieras, cada uno representando a un caracter.
+De manera que, si usas:
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name LIKE '______Z ';
+```
+
+ese query te devolvería clientes con apellido Jimenez.
+Este código tambien te devolvería Jimenez, ya que reemplazé el primer subguión por una 'J':
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name LIKE 'J_____Z ';
+```
+
+Como explicado anteriormente en otros operadores, en caso de querer todo menos los matches de ese patrón, puedes anteponer el operador NOT:
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name NOT LIKE 'J_____Z ';
+```
+
+<br>
+
+---
+
+<br>
+
+### _**`REGEXP`**_ operator
+
+| first_name | last_name | points | state  |
+| ---------- | --------- | ------ | ------ |
+| Juan       | Enderica  | 300    | Guayas |
+| Manuel     | Fayad     | 100    | Quito  |
+| Pablo      | Jiemnez   | 600    | Cuenca |
+| Josué      | Jiemnez   | 900    | Cuenca |
+
+Digamos que de esa tabla, quieres las columnas de los clientes que tengan'nez' en cualquier lugar de su apellido.
+Usando el like operator, lo tipearías así:
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name LIKE '%nez%';
+```
+
+Esto te devolvería a Pablo y a Josué.
+Ahora, podemos hacer exactamente lo smimo, con el regexp operator:
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name REGEXP 'field';
+```
+
+Eso hace lo mismo que su anterior.
+
+Con el operador _`REGEXP`_, hay a disposición varios símbolos los cuales sirven para especificar detalles de la string que quieres retornar.
+
+Ahora haré una lista de ejemplos de esos símbolos:
+
+<br>
+
+_`^`_
+
+Significa que la string debe empezar, con lo que le escribas despues del sīmbolo.
+
+En este caso:
+El string debe empezar con 'field'
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name REGEXP '^field';
+```
+
+<br>
+
+_`$`_
+
+A diferencia de anterior, este representa el final de una string.
+
+El apellido debe terminar con field:
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name REGEXP 'field$';
+```
+
+<br>
+
+_`|`_
+
+Retorna cualquiera de los matches que le escribas.
+
+El apellido tiene que tener o la palabra field o la palabra jimenez:
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name REGEXP 'field|jimenez';
+```
+
+El apellido puede o empezar con field, o tener jimenez en cualquier lugar de su string o terminar con rica.
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name REGEXP '^field|jimenez|rica$';
+```
+
+<br>
+<br>
+El apellido tiene que tener la letra 'e' en cualquier parte:
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name REGEXP 'e';
+```
+
+<br>
+<br>
+[]
+
+El apellido tiene que tener la letra e en cualquier parte, pero FIJO, antes de la 'e' tiene que haber o una 'g', o 'i' o 'm'.
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name REGEXP '[gim]e';
+```
+
+El apellido tiene que tener la letra e en cualquier parte, pero FIJO, después de la 'e' tiene que haber o una 'g', o 'i' o 'm'.
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name REGEXP 'e[gim]';
+```
+
+El apellido tiene que tener la letra e, pero antes puede ir cualquier letra que sea de la 'a' a la 'f' (a o b o c o d o e o f)
+
+```SQL
+SELECT *
+FROM customers
+WHERE last_name REGEXP '[a-f]e';
+```
+
+<br>
+
+---
+
+<br>
+
+### _**`NULL`**_ operator
+
+Con esto puedes buscard por registro faltantes de un atributo.
+Por ejemplo, clientes que no tengan un dato, teniendo esta tabla:
+| first_name | last_name | points | state |
+| ---------- | --------- | ------ | ------ |
+| Juan | Enderica | 300 | Guayas |
+| Manuel | Fayad | 100 | Quito |
+| Pablo | Jiemnez | null | Cuenca |
+| Josué | Jiemnez | 900 | Cuenca |
+
+```SQL
+SELECT *
+FROM customers
+WHERE points IS NULL;
+```
+
+Esto te devolvería a Pablo ya que el no tiene puntos.
+
+```SQL
+SELECT *
+FROM customers
+WHERE points IS NOT NULL;
+```
+
+Puedes anteponer el operador 'NOT', a manera que el query te devuelva a todos los clientes que SI tienen puntos.
+
+<br>
+
+---
+
+<br>
+
+### _**`ORDER BY`**_ operator
+
+Para entender esto, primero se debe saber como funciona SQL por default.
+Si tienes una tabla de clientes, y corres el siguiente query:
+
+```SQL
+SELECT *
+FROM customers
+```
+
+Tu tendrías una tabla mas o menos así:
+
+| id  | first_name | last_name | points | state           |
+| --- | ---------- | --------- | ------ | --------------- |
+| 1   | Juan       | Enderica  | 300    | Guayas          |
+| 2   | Manuel     | Fayad     | 100    | Quito           |
+| 3   | Pablo      | Jiemnez   | null   | Cuenca          |
+| 4   | Josué      | Jiemnez   | 900    | Cuenca          |
+| 5   | Josué      | Guevara   | 50     | Morona Santiago |
+
+Como puedes ver, por default, SQL te los regresa ordenados, segun la columna ID.
+
+En base de datos relacional, cada tabla, tiene su ` primary key column`, y por convención, los valores de esa columna, tienen que identificar a esa fila de manera individual, por eso es que cada una tiene un distinto número.
+
+Por eso es que cuando haces un query para pedir una tabla, sin especificar como ordenarlos, el query te devuelve una tabla ya ordenada, segun esa primera columna.
+
+Sabiendo eso, ya puedes saber que uno puedes pedir una tabla, pero hacer que la tengas ordenada segun los valores de una columna distinta.
+
+Ejemplo:
+
+```SQL
+SELECT *
+FROM customers
+ORDER BY last_name
+```
+
+Ese query te devolvería:
+| id | first_name | last_name | points | state |
+| -- | ---------- | --------- | ------ | ------ |
+|1| Juan | Enderica | 300 | Guayas |
+|2| Manuel | Fayad | 100 | Quito |
+|5| Josué | Guevara | 50 | Morona Santiago |
+|3| Pablo | Jiemnez | null | Cuenca |
+|4| Josué | Jiemnez | 900 | Cuenca |
+
+Como puedes ver, te los ordeno, según orden alfabético, en la columna que le especificaste (last_name)
+
+Puedes hacer en sea en orden alfabético pero de manera descendente con la palabra `DESC`:
+
+```SQL
+SELECT *
+FROM customers
+ORDER BY last_name DESC
+```
+
+Eso te devuelve:
+| id | first_name | last_name | points | state |
+| -- | ---------- | --------- | ------ | ------ |
+|3| Pablo | Jiemnez | null | Cuenca |
+|4| Josué | Jiemnez | 900 | Cuenca |
+|5| Josué | Guevara | 50 | Morona Santiago |
+|2| Manuel | Fayad | 100 | Quito |
+|1| Juan | Enderica | 300 | Guayas |
+
+<br>
+
+Puedes poner varias columnas dentro del ORDER BY, a manera que primero los ordena segun su primer valor, y luego, en caso de haber ese primer valor repetido, los ordena segun el segundo criterio que le dijiste:
+
+```SQL
+SELECT *
+FROM customers
+ORDER BY state, last_name
+```
+
+Este query te los ordenará por ciudad, y luego, en el caso de Cuenca ya que hay dos clientes de Cuenca, te los ordena en orden alfabético según su apellido:
+| id | first_name | last_name | points | state |
+| -- | ---------- | --------- | ------ | ------ |
+|3| Pablo | Jiemnez | null | Cuenca |
+|4| Josué | Jiemnez | 900 | Cuenca |
+|1| Juan | Enderica | 300 | Guayas |
+|5| Josué | Guevara | 50 | Morona Santiago |
+|2| Manuel | Fayad | 100 | Quito |
+
+Una ventaja de MySQL es que puedes ordenarlas dando como referencia una columna, como has venido haciendo hasta ahora con el ORDER BY, pero puedes no necesariamente pedir ver esas columnas, es decir:
+
+```SQL
+SELECT first_name, last_name
+FROM customers
+ORDER BY state, last_name
+```
+
+Esto te da:
+
+| first_name | last_name |
+| ---------- | --------- |
+| Pablo      | Jiemnez   |
+| Josué      | Jiemnez   |
+| Juan       | Enderica  |
+| Josué      | Guevara   |
+| Manuel     | Fayad     |
+
+Date cuenta como te los devolvío organizando según llos filtros que le especificaste, pero no estas viendo las columnas de esos filtros, solo estas viendo las columnas que le pediste en SELECT.
+En otros sistemas de manejo de datos no se puede hacer esto, usualmente te estaría botando errores.
+
+<br>
+
+Puedes ser mas breve tambien, y en vez de especificar bajo que columna ordenarla, puedes poner el número de la columna **siempre y cuando esta esté especificada dentro del _`select`_**:
+
+```SQL
+SELECT first_name, last_name
+FROM customers
+ORDER BY 1, 2
+```
+
+Esto te las odena primero según su first_name y luego según su last_name.
+
+<br>
+
+### _**`AS`**_ operator
+
+Puedes inventarte una columna extra al momento de generar tu tabla. Dentro de esa celda puedes inventarte lo que quieras, puntos, sumas, multiplicaciones, calcular porcentajes usando otras celdas, por ejemplo:
+
+```SQL
+SELECT first_name, last_name, 10 AS goles
+FROM customers
+ORDER BY 1, 2
+```
+
+Esto te da:
+
+| first_name | last_name | goles |
+| ---------- | --------- | ----- |
+| Josué      | Guevara   | 10    |
+| Josué      | Jiemnez   | 10    |
+| Juan       | Enderica  | 10    |
+| Manuel     | Fayad     | 10    |
+| Pablo      | Jiemnez   | 10    |
+
+Ten cuidado usando esto porque si en un futuro llega a cambiar el orden o el valor de las columnas que se le pasan a _select_, el código te devolvería algo que no quieres.
+
+<br>
+
+<br>
+
+---
+
+<br>
+
+### _**`LIMIT`**_ operator

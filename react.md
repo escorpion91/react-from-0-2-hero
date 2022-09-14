@@ -1224,6 +1224,164 @@ El otro componente:
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
+export const AddCategory = () => {
+  const [inputValue, setInputValue] = useState('');
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  return (
+    <div>
+      <input type="text" value={inputValue} onChange={handleInputChange} />
+    </div>
+  );
+};
+
+AddCategory.propTypes = {
+  setCategories: PropTypes.func.isRequired,
+};
+```
+
+- Este componente es básicamente una caja de input.
+- Usaremos useStates para cambiar el valor de lo que dice la caja.
+- El valor de la caja esta asignado a inputValue
+- No se puede cambiar así no mas el valor de la caja si no que debemos usar la función interna llamada 'onChange', dentro del button
+- El onChange está hecho para que se dispare cada vez que la caja de texto cambie
+- Siempre una buena manera de ver el nombre del evento que dispara alguna función como el onChange, para saber cual es, es pasarle el evento (e) y hacer el console.log del e:
+
+```
+onChange={(e) => console.log(e)}
+```
+
+- Eso te bota alguuuunos valores que pueden cambiar, entonces la idea es saber cual es el que hay que cambiar.
+- Luego descubres que e.target.value se le llama al valor de la caja de texto
+- Al detectar un cambio en el button, haremos que se dispare la función handleInputChange, la cuál cambiará ese e.target.value
+- en handleInputChange se corre la función setInputValue que es el segundo parámetro de tu useState, la cual recibe el e.target.value
+- De esa manera, el setInputValue cambia el valor del inputValue, por lo que sea que estas escribiendo y como ese inputValue esta asignado como el valor de tu button, este cambiará cada vez que escribas algo.
+
+Hata ese punto, hay que manejar que es lo que pasa cuando una persona de enter a lo que sea que escriba en esa caja de texto.
+
+Para eso crearemos la función handleSubmit:
+
+```js
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+
+export const AddCategory = () => {
+  const [inputValue, setInputValue] = useState('');
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input type="text" value={inputValue} onChange={handleInputChange} />
+      </form>
+    </div>
+  );
+};
+
+AddCategory.propTypes = {
+  setCategories: PropTypes.func.isRequired,
+};
+```
+
+- Ponemos el input dentro de un form, cuya propiedad onSubmit, disparará la función handlSubmit.
+- Para empezar, para prevenir que haya un refresheo de página cada vez que se haga un submit, usamos el metodo e.preventDefault()
+- Ahora la idea es, que cuando se de click en submit, eso que escribiste se agregue al componente padre, el cual contiene la lista de series.
+- Ese último paso vendría a ser 'comunicación entre componentes'
+
+Hasta ahora, en el componente padre, la manera que tenemos de agregar elementos a la lista es mediante el useState (llamado setCategories), entonces lo que tenemos que hacer, es, desde la caja de texto que es el componente hijo, hacer que se dispare el addCategory cada bez que una persona de click en enter.
+
+Como se hace eso? Pues sencillo, como componente padre que es, al momento de escribirlo en el código, se lo mandas la función setCategories como prop:
+
+```JSX
+import React, { useState } from 'react';
+import { AddCategory } from './components/AddCategory';
+
+const GifExpertApp = () => {
+  const [categories, setCategories] = useState([
+    'One Punch',
+    'Samurai X',
+    'Dragon Ball',
+  ]);
+
+  return (
+    <div>
+      <h2>GifExpertApp</h2>
+      <AddCategory setCategories={setCategories} />
+      <hr></hr>
+
+      <ol>
+        {categories.map((category) => {
+          return <li key={category}>{category}</li>;
+        })}
+      </ol>
+    </div>
+  );
+};
+
+export default GifExpertApp;
+```
+
+Ahora tenemos que escribir en el componente hijo (AddCategories) el decoy de esa prop, cosa que el sepa que hacer con ella cuando la reciba:
+
+```js
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+
+export const AddCategory = ({ setCategories }) => {
+  const [inputValue, setInputValue] = useState('');
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setCategories((cats) => [...cats, inputValue]);
+    setInputValue('');
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input type="text" value={inputValue} onChange={handleInputChange} />
+      </form>
+    </div>
+  );
+};
+```
+
+- Como puedes ver, setCategories fue pasado a este componente.
+- setCategories es una función
+- setCategories ya sabe cuales son los estados anteriores del useState
+- Ese estado lo recibe como callback
+- En este caso lo hemos llamado cats
+- Como debes recordar, setCategories necesita dos parametros en su función:
+  - Qué va a cambiaer
+  - Con qué lo va a reemplazar
+- Por eso es que se le pasa cats
+- Entre corchetes se está diciendo 'cambiame cats (que ya sabemos que es el useState anterior, por el inputValue)
+
+Hasta ahí ya esta funcionando como debería tu app, pero hay dos cosas que podemos hacer:
+
+- Que sea obligatorio que le pases una prop al componente hijo
+- Hacer que no acepte un inputValue de un espacio vacio o texto en blanco, ya que hasta este punto, si no escribes nad ay das enter, igual lo agrega a la lista
+
+Para solucionar esos dos itemss escritos arriba, el código sería así:
+
+```js
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+
 export const AddCategory = ({ setCategories }) => {
   const [inputValue, setInputValue] = useState('');
 
@@ -1252,7 +1410,3 @@ AddCategory.propTypes = {
   setCategories: PropTypes.func.isRequired,
 };
 ```
-
-- Este componente es básicamente una caja de input.
-- Usaremos useStates para cambiar el valor de lo que dice la caja.
-- El valor de la caja esta asignado a inputValue

@@ -994,7 +994,7 @@ export default CounterApp;
 
 tienes que entender que useState retorna un array.
 El primer elemento del array es el que se lo usará como state.
-El segundo elemento, es una función, la cual se la usa para cambiar al state.
+El segundo elemento, es una función, la cual se la usa para cambiar al state. aA esta función la idea es convocarla mas abajo, pasándole como argumento un array, objeto o cualquier valor que sea el que reemplaze al anterior.
 Este segundo elemento puede recibir una arrow function, cuyo argumento, por defecto, react tomará como que es el estado anterior de tu state.
 
 - como useState retorna array, podrías guardalo en una constante, y luego indexar, pero se vería un poco confuso. Por lo tanto tienes que destructurar, por eso se escribe así como array
@@ -1410,3 +1410,331 @@ AddCategory.propTypes = {
   setCategories: PropTypes.func.isRequired,
 };
 ```
+
+<br>
+
+<br>
+
+## `Implementando Fetch API a la aplicación`
+
+Hasta ahora ya tenemos una app que es un componente, la cual contienen a otro componente.
+Este segundo componente es una caja de texto, la cual recibe texto y al poner enter, este texto ingresado se agrega a una lista.
+
+Ahora la idea es hacer que en vez de ser agregado no más a la lista, tu app haga una petición a una API con ese texto, la cual te deba regresar gifs relacionados con la categoría que buscaste, y que estos gifs sea desplegados en tu app.
+
+Recuerdas que en tu componente principal, lo que hacía para renderizar la lista de series, era un `método map`?
+(chequealo en el código abajo) Hasta ahora tus dos componentes:
+
+```js
+import React, { useState } from 'react';
+import { AddCategory } from './components/AddCategory';
+
+const GifExpertApp = () => {
+  const [categories, setCategories] = useState([
+    'One Punch',
+    'Samurai X',
+    'Dragon Ball',
+  ]);
+
+  return (
+    <div>
+      <h2>GifExpertApp</h2>
+      <AddCategory setCategories={setCategories} />
+      <hr></hr>
+
+      <ol>
+        {categories.map((category) => {
+          return <li key={category}>{category}</li>;
+        })}
+      </ol>
+    </div>
+  );
+};
+
+export default GifExpertApp;
+```
+
+```js
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+
+export const AddCategory = ({ setCategories }) => {
+  const [inputValue, setInputValue] = useState('');
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (inputValue.trim().length > 2) {
+      setCategories((cats) => [...cats, inputValue]);
+      setInputValue('');
+    }
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input type="text" value={inputValue} onChange={handleInputChange} />
+      </form>
+    </div>
+  );
+};
+
+AddCategory.propTypes = {
+  setCategories: PropTypes.func.isRequired,
+};
+```
+
+Ahora la idea es que en vez de renderizar manualmente esa lista, retorne un nuevo componente, el cual sera la respuesta de tu API.
+
+- Ahora ese metodo map, cada vez que indexe, va a tomar como token el indx en el que esta y lo va a llamar category.
+- Cada indexada, va a regresar tu componente gifgrid, al cual se le está pasando la como prop 'category', que es el token de cada indexacion
+
+```js
+<ol>
+  {categories.map((category) => {
+    return <GifGrid key={category} category={category} />;
+  })}
+</ol>
+```
+
+Con todo lo hecho anteriormente, ya sabemos que el componente GifGrid SI está agarrando la categoría.
+Ahora lo que tenemos que hacer es que con esa categoría que se la está pasando el método map, el haga una petición Http.
+
+**La idea es mediante fetch API, bajarse esos gifs, guardarlos en una constante, y luego esa constante pasarla al useState.
+De esa manera, el estado del componente cambia cada vez que se haga una petición**
+
+```js
+import React, { useState, useEffect } from 'react';
+
+export const GifGrid = ({ category }) => {
+  const [images, setimages] = useState([]);
+
+  useEffect(() => {
+    getGifs();
+  }, []);
+
+  const getGifs = async () => {
+    const url =
+      'https://api.giphy.com/v1/gifs/search?q=rickandmorty&limit=10&api_key=XF6VjNxOHCOOHgtNwRLAy5oftKQeWRgT';
+    const resp = await fetch(url);
+    const { data } = await resp.json();
+
+    const gifs = data.map((img) => {
+      return {
+        id: img.id,
+        title: img.title,
+        url: img.images?.downsized_medium.url,
+      };
+    });
+
+    setimages(gifs);
+  };
+
+  return (
+    <div>
+      <h3>{category}</h3>
+      <ol>
+        {images.map((img) => (
+          <li key={img.id}>{img.title}</li>
+        ))}
+      </ol>
+    </div>
+  );
+};
+```
+
+---
+
+<br>
+
+## **_`Hasta aquí haré un desglose y resumen de todo lo que está pasando en la app, así mismo pondre como tengo el código hasta ahora, ya que han cambiado un poco desde los últimos snippets que he subido. La idea de esto es venir a esta parte como referencia, pero si se quiere saber exactamente el proceso de pensamiento que llevo a los snipets a ser como son, quizás ahi si ver más arriba.`_**
+
+Resumen:
+
+Para empezar, saber que tenemos 4 componentes.
+Hablemos del primero:
+
+<br>
+
+### **App Component Principal**
+
+- Tu componente principal, el cual es tu app básicamente. Este componente es padre de 3 componentes (2 directos y 1 indirecto)
+- Uno de esos componentes es encargado de capturar texto y actualizar el useState de tu app
+- El otro componente es encargado de, una vez actualizado el useState de tu app, con ese useState, hacer una petición Http.
+
+Como lo hace?
+
+- Este componente hace un map al useState, y con cada iteración, retorna un componente llamado GifGrid, al cual le pasa su useState como prop, y este realiza con eso peticiones a una API.
+
+<br>
+
+### **Componente AddCategory**
+
+- Hijo directo del componente principal
+- Este componente es básicamente una caja de texto
+- La función de este man, es capturar lo que diga la caja de texto, y con ese valor, actualizar el useState del app component.
+
+<br>
+
+### **Componente GifGrid**
+
+- Hijo directo del componente principal
+- La función de este es, una vez actualizado el useState del app componente, hacer una petición a la API.
+- Gifgrid tendrá siempre la petición API que hagas, adjuntadas a las que hayas hecho antes. Entonces siempre que busques, solo se agregará las 10 imágenes más a las que ya tenías. Cómo lo hace?:
+
+<br>
+
+- GifGrid recibe como prop, el estado actual de tu app component.
+- Dentro de GifGrid, lo que el hace es una petición a la API, usando el prop que recibe de su padre
+- Se hace un map a toda esa respuesta, extrayendo solos los datos que queremos, y eso se guarda en una const.
+- Esa nueva constante, se transforma en el actual useState de GifGrid
+- GifGrid mapeará por cada imagen que tiene tu useState actual, cada iteración devolverá a su componente hijo: GifGridItem
+- Ese mapeo regresa el id de cada imagen sumada a todas las iteraciones anteriores
+
+Míralo de esta manera. Tu app encerrará a un arreglo de categorías.
+Tus categorías encerraran a un arreglo de imagenes (Esto es GifGrid)
+Tus imágenes independientes se llamarán GifGridItem.
+
+<br>
+
+### **Componente GifGridItem**
+
+-
+
+<br>
+
+---
+
+## **`Scripts`**
+
+### **App Component Principal**
+
+```js
+import React, { useState } from 'react';
+import { AddCategory } from './components/AddCategory';
+import { GifGrid } from './components/GifGrid';
+
+const GifExpertApp = () => {
+  const [categories, setCategories] = useState(['One Punch']);
+
+  return (
+    <div>
+      <h2>GifExpertApp</h2>
+      <AddCategory setCategories={setCategories} />
+      <hr></hr>
+      <ol>
+        {categories.map((category) => {
+          return <GifGrid key={category} category={category} />;
+        })}
+      </ol>
+    </div>
+  );
+};
+
+export default GifExpertApp;
+```
+
+<br>
+
+### **Componente AddCategory**
+
+```js
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+
+export const AddCategory = ({ setCategories }) => {
+  const [inputValue, setInputValue] = useState('');
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (inputValue.trim().length > 2) {
+      setCategories((cats) => [inputValue, ...cats]);
+      setInputValue('');
+    }
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input type="text" value={inputValue} onChange={handleInputChange} />
+      </form>
+    </div>
+  );
+};
+
+AddCategory.propTypes = {
+  setCategories: PropTypes.func.isRequired,
+};
+```
+
+<br>
+
+### **Componente GifGrid**
+
+```js
+import React, { useState, useEffect } from 'react';
+import { GifGridItem } from './GifGridItem';
+
+export const GifGrid = ({ category }) => {
+  const [images, setimages] = useState([]);
+
+  useEffect(() => {
+    getGifs();
+  }, []);
+
+  const getGifs = async () => {
+    const url = `https://api.giphy.com/v1/gifs/search?q=${encodeURI(
+      category
+    )}&limit=10&api_key=XF6VjNxOHCOOHgtNwRLAy5oftKQeWRgT`;
+    const resp = await fetch(url);
+    const { data } = await resp.json();
+
+    const gifs = data.map((img) => {
+      return {
+        id: img.id,
+        title: img.title,
+        url: img.images?.downsized_medium.url,
+      };
+    });
+
+    setimages(gifs);
+  };
+
+  return (
+    <>
+      <h3>{category}</h3>
+      <div className="card-grid">
+        {images.map((img) => (
+          <GifGridItem key={img.id} {...img} />
+        ))}
+      </div>
+    </>
+  );
+};
+```
+
+<br>
+
+### **Componente GifGrid**
+
+```jsx
+import React from 'react';
+
+export const GifGridItem = ({ title, url }) => {
+  return (
+    <div className="card">
+      <img src={url} alt={title} />
+      <p>{title}</p>
+    </div>
+  );
+};
+```
+
+---

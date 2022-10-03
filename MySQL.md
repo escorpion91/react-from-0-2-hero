@@ -901,3 +901,212 @@ Ten cuidado usando esto porque si en un futuro llega a cambiar el orden o el val
 <br>
 
 ### _**`LIMIT`**_ operator
+
+Con esta clause puedes limitar el nombre de registros retornados por tu query.
+Por ejemplo, si ejecutas este query:
+
+```SQL
+SELECT *
+FROM customers
+```
+
+Retornarías todos los matches. Ahora, si quisieras regresar solo los 3 primeros clientes de ese query:
+
+```SQL
+SELECT *
+FROM customers
+LIMIT 3
+```
+
+En caso de que solo hayan dos clientes, igual te trae todos. la idea es que no pase de 3.
+
+Pueses pedir un max que 300 por ejemplo, y si hay menos, ye los trae todos igual:
+
+```SQL
+SELECT *
+FROM customers
+LIMIT 300
+```
+
+Puedes hacer que al retornarte, el query skipee un numero de clientes, y que ahi recien retorne x cantidad de clientes. Ejemplo:
+
+```SQL
+SELECT *
+FROM customers
+LIMIT 6, 3
+```
+
+Ese código se salta los 6 primeros clientes de tu query, y de ahi te bota los siguientes 3.
+Digamos que quieres obtener tu top 3 de clientes con mas puntos por ejemplo:
+
+```SQL
+SELECT *
+FROM customers
+ORDER BY points DESC
+LIMIT 3
+```
+
+La limit clause siempre debe ser espicificada al final de tu query.
+
+<br>
+
+<br>
+
+---
+
+<br>
+
+### _**`INNER JOINS`**_ operator
+
+Hasta ahora solo hemos seleccionado data de una sola tabla, pero en realidad vas bastantes veces a tener que extraer data de distintas tablas al mismo tiempo.
+
+Digamos que tienes la siguiente tabla orders:
+| order id| customer id| status |
+| ---------- | --------- | ----- |
+| 1 | 6 | 1 |
+| 2 | 7 | 12 |
+| 3 | 1 | 1 |
+| 4 | 2 | 1 |
+| 5 | 4 | 3 |
+
+Como pudes ver, es tu tabla de ordenes. Y en la columna de clientes, en vez de tener todo la info del cliente, solo tiene el id.
+Este id es el id del cliente en otra tabla clients. La cual si posee toda la info del cliente, nombre, mail, etc.
+Esto se lo hace de esta manera cosa que si cambia la info del cliente, solo lo cambias en la tabla de clientes, ya que en esta tabla de ordenes, se lo esta referenciando de esa tabla.
+Esos son los beneficios de relational data base.
+
+Ahora, que pasa si quieres acceder a unas órdenes de la tabla de orders, pero quieres que con ese query, muestre datos completos del cliente, más no solo el client id (que es lo unico del cliente que hay en la tabla orders):
+
+```SQL
+SELECT *
+FROM orders
+```
+
+Hasta ahi estas seleccionado todas las ordenes de la tabla orders.
+Ahora lo que tienes que hacer es combinar, las columnas que quieras de esta orders table, con las columnas del client table:
+
+```SQL
+SELECT *
+FROM orders
+JOIN customers
+    ON orders.customer_id = customers.customer_id
+```
+
+Es litarealmente decerle a SQL 'mira, hazme una tabla juntando la de orders con la de customers, y bajo que criterio las unes? Pues bajo la condicion de que el customer id en orders sea igual al customer id en cosumers.
+
+Ese query te hace algo como una concatenación. Y como estamos seleccionando todo, te devuelve una tabla gigante.
+Lo que puedes hacer tambien es minimizar la cantidad de columnas:
+
+```SQL
+SELECT order_id, first_name, last_name
+FROM orders
+JOIN customers
+    ON orders.customer_id = customers.customer_id
+```
+
+Eso te traería no mas 3 columnas.
+
+<br>
+<br>
+<br>
+
+```SQL
+SELECT order_id, orders.customer_id first_name, last_name
+FROM orders
+JOIN customers
+    ON orders.customer_id = customers.customer_id
+```
+
+Cuando tienes columnas repetidas en tablas distintas, tienes que espcificar poniendo como prefijo el nombre de la tabla.
+
+<br>
+<br>
+<br>
+
+Como puedes ver, en el código anterior repites palabras orders y customers bastante.
+Puedes darle alias a las palabras cosa que en vez de escribirlas completas, solo escribes su alias. Esto hace que tu código se vea un poco mas limpio.
+
+```SQL
+SELECT order, o.customer_id first_name, last_name
+FROM orders o
+JOIN customers c
+    ON o.c_id = c.customer_id
+```
+
+<br>
+
+<br>
+
+---
+
+<br>
+
+### _**`COMBINAR COLUMNAS DE DISTINTAS TABLAS DE MULTIPLES BASE DE DATOS`**_
+
+A veces, tendras que acceder a una tabla que se encuentra en otra base de datos. Ejemplo:
+
+```SQL
+SELECT *
+FROM orders_items oi
+JOIN ssql_inventory.products p
+    ON oi.product_id = p.product_id
+```
+
+En el código de arriba, estas diciendo que le sumes a tu tabla de orders, la tabla de products que se encuentra en la base de datos inventory.
+Bajo la condición de que la columna de productos en tu tabla de orders sea la misma que la columna de productos de tu tabla de productos.
+
+<br>
+
+<br>
+
+---
+
+<br>
+
+### _**`SELF JOINS`**_
+
+Habrá veces en las que quieres unir una tabla, con una columna de esa misma tabla.
+
+Digamos que tienes una tabla de empleados, cada uno con su ID, y asi mismo, esa tabla tiene una columna de managers (reports to). Es decir, el manager de cada empleado.
+En esa columna, esta el id del manager a quien el empleado responde, quien a su vez, se encuentra dentro de la misma tabla, ya que el manager tambien es un empleado.
+
+Las reglas son llamar a la misma columna que se repite pero con diferentes alias y prejifos.
+Y lo unes usando la condición dentro de **JOIN**
+
+Digamos que quieres traer una tabla y que se le concatene el nombre del manager de cada uno, a la derecha:
+
+```SQL
+USE sql_hr;
+
+SELECT *
+FROM employees e
+JOIN employees m
+    ON e.reports_to = m.employee_id
+```
+
+El ON basicamente es decir que fila unir con que fila. En este caso estas diciendo, cuando te matcheen el reports_to de esta tabla, con ell employee_id de esta tabla, bajo ese criterio unelos.
+Así mismo date cuenta que en el JOIN, traes a la misma tabla pero TIENES QUE traerla bajo otro alias.
+
+Ese query lo que te traer es toda la tabla de empleados, y a su derecha, se le une el empleado cuyo id, es igual al de reports to.
+EXPLICACION CLARISIMA :)
+
+Ahora, si queremos solo el nombre del empleado, su id y el manager:
+
+```SQL
+USE sql_hr;
+
+SELECT
+    e.employee_id,
+    e.first_name,
+    m.first_name AS manager
+FROM employees e
+JOIN employees m
+    ON e.reports_to = m.employee_id
+```
+
+En ese query, estás trayendo 3 columnas.
+
+- Tu tabla sera una concatenacion de dos partes. La primera es id y nombre y la segunda es el manager.
+- Por eso primero seleccionas de 'e', el id y el nombre.
+- A eso se le junta la 3ra columna que la traes del alias m, que son los managers.
+- El criterio es que el reports to sea igual a employee id.
+- La traes esa columna como 'manager'
